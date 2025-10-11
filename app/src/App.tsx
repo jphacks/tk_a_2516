@@ -3,6 +3,7 @@ import SentenceDisplay from './components/SentenceDisplay'
 import VideoRecorder from './components/VideoRecorder'
 import ScoreDisplay from './components/ScoreDisplay'
 import TranscriptionDisplay from './components/TranscriptionDisplay'
+import ProgressBar from './components/ProgressBar'
 
 // アプリの状態管理
 type AppState = 'ready' | 'recording' | 'processing' | 'result'
@@ -28,19 +29,19 @@ function App() {
 
   const handleStopRecording = async (videoBlob: Blob) => {
     setAppState('processing')
-    
+
     // バックエンドに送信（MVPではモック）
     try {
       // 実際の実装では、ここでバックエンドAPIを呼び出し
       // videoBlobをバックエンドに送信して文字起こしと採点を行う
       console.log('Video blob size:', videoBlob.size) // デバッグ用
-      
+
       await new Promise(resolve => setTimeout(resolve, 2000)) // 2秒のモック処理
-      
+
       // ランダムに文字起こし結果を生成（実際の認識精度をシミュレート）
       const originalText = sentences[currentSentence]
       const originalWords = originalText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(word => word.length > 0)
-      
+
       // 単語単位でランダムに誤りを生成
       const mockTranscribedWords = originalWords.map(word => {
         if (Math.random() > 0.7) { // 30%の確率で誤り
@@ -52,22 +53,22 @@ function App() {
         }
         return word
       })
-      
+
       const mockTranscribed = mockTranscribedWords.join(' ')
       setTranscribedText(mockTranscribed)
-      
+
       // ミス数に基づく点数計算
-      const correctWords = mockTranscribedWords.filter((word, index) => 
+      const correctWords = mockTranscribedWords.filter((word, index) =>
         word.toLowerCase() === originalWords[index].toLowerCase()
       ).length
       const totalWords = originalWords.length
-      
+
       // ミス数が少ないほど高得点（0ミス=100点、全ミス=0点）
       const scorePercentage = (correctWords / totalWords) * 100
       const mockScore = Math.round(scorePercentage)
-      
+
       console.log(`正解単語: ${correctWords}/${totalWords}, スコア: ${mockScore}点`) // デバッグ用
-      
+
       setScore(mockScore)
       setAppState('result')
     } catch (error) {
@@ -100,6 +101,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-4 max-w-md">
+        <ProgressBar current={currentSentence + 1} total={sentences.length} />
         {/* ヘッダー */}
         <div className="text-center mb-4">
           <h1 className="text-xl font-bold text-gray-800 mb-1">
@@ -108,16 +110,13 @@ function App() {
           <p className="text-xs text-gray-600">
             口の動きで発音を判定します
           </p>
-          <div className="mt-2 text-xs text-gray-500">
-            {currentSentence + 1} / {sentences.length}
-          </div>
         </div>
 
         {/* メインコンテンツ */}
         {appState !== 'result' ? (
           <div className="space-y-4">
             {/* 例文表示 */}
-            <SentenceDisplay 
+            <SentenceDisplay
               sentence={sentences[currentSentence]}
               isVisible={appState === 'ready' || appState === 'recording'}
             />
@@ -143,7 +142,7 @@ function App() {
 
             {/* 採点結果 */}
             {score !== null && (
-              <ScoreDisplay 
+              <ScoreDisplay
                 score={score}
                 onNext={handleNextSentence}
                 onRetry={handleRetry}
