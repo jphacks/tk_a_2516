@@ -86,3 +86,18 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+
+# Python / Chaplin vendor artifacts
+*.py[cod]
+__pycache__/
+*.so
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+pip-wheel-metadata/
+*.egg-info/
+pip-log.txt
+pip-delete-this-directory.txt
