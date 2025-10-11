@@ -101,3 +101,5 @@ pip-wheel-metadata/
 *.egg-info/
 pip-log.txt
 pip-delete-this-directory.txt
+chaplin/benchmarks/LRS3/lm_en_subword 2/model.json
+chaplin/benchmarks/LRS3/lm_en_subword 2/model.pth
