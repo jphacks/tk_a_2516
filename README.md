@@ -1,6 +1,10 @@
 ﻿# SilentSpeaking
 <img width="160" height="320" alt="Image" src="https://github.com/user-attachments/assets/dc29bfc0-a78c-4154-8d81-3e06dc7fb72d" />
 
+
+https://github.com/user-attachments/assets/18fb9693-8c71-4347-9017-116b57924848
+
+
 ## 製品概要
 ### 背景(製品開発のきっかけ、課題等）
 グローバル化が進む現代社会において、英語スピーキングの能力は非常に重要である。スピーキングは当然声を出すものであるから、家の外では練習できない。しかし、忙しい現代人は電車での移動時間しか勉強時間を確保できなかったり、日中の頑張りに燃え尽きて家の環境では勉強をする気が起きなかったりして、英語を話すことを諦めがちである。
