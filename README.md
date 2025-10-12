@@ -1,5 +1,5 @@
 ﻿# SilentSpeaking
-<img width="240" height="620" alt="Image" src="https://github.com/user-attachments/assets/eecdad6d-2ff2-482e-8bab-5ffab56910c4" />
+<img width="160" height="320" alt="Image" src="https://github.com/user-attachments/assets/dc29bfc0-a78c-4154-8d81-3e06dc7fb72d" />
 
 ## 製品概要
 ### 背景(製品開発のきっかけ、課題等）
