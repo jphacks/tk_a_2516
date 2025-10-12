@@ -46,8 +46,8 @@ ReactフロントエンドからLip reading機能呼び出すことができま�
 ## 著作権とライセンス
 
 ### Tatoeba
-このプロジェクトは、Tatoeba（https://tatoeba.org/）の翻訳データを使用しています。Tatoebaは例文のデータベースで、CC BY 2.0 FRライセンスの下で提供されています。
+このプロジェクトは、Tatoeba（https://tatoeba.org/ ）の翻訳データを使用しています。Tatoebaは例文のデータベースで、CC BY 2.0 FRライセンスの下で提供されています。
 
 ### Chaplin
-このプロジェクトは、Chaplin（https://github.com/amanvirparhar/chaplin）のコードを改変して使用しています。ChaplinはMITライセンスの下で提供されています。
+このプロジェクトは、Chaplin（https://github.com/amanvirparhar/chaplin ）のコードを改変して使用しています。ChaplinはMITライセンスの下で提供されています。
 
