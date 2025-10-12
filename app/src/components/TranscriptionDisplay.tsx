@@ -23,9 +23,9 @@ const compareSentences = (original: string, transcribed: string) => {
   // 単語の一致をチェック
   const comparison = originalWords.map((originalWord, index) => {
     const transcribedWord = transcribedWords[index]
-    const isMatch = transcribedWord && 
+    const isMatch = transcribedWord &&
       originalWord.toLowerCase() === transcribedWord.toLowerCase()
-    
+
     return {
       word: originalWord,
       isCorrect: isMatch,
@@ -36,10 +36,10 @@ const compareSentences = (original: string, transcribed: string) => {
   return comparison
 }
 
-const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({ 
-  originalSentence, 
-  transcribedText, 
-  isVisible 
+const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
+  originalSentence,
+  transcribedText,
+  isVisible
 }) => {
   const comparison = compareSentences(originalSentence, transcribedText)
 
@@ -50,7 +50,7 @@ const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
           <h2 className="text-sm font-semibold text-gray-700 mb-2">
             文字起こし結果
           </h2>
-          
+
           {/* 適度にコンパクトな比較表示 */}
           <div className="space-y-2">
             {/* 元の例文 */}
