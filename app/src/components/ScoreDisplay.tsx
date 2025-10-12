@@ -19,41 +19,41 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
   const getScoreInfo = (value: number) => {
     if (value >= 90) {
       return {
-        grade: 'Excellent',
+        grade: 'とてもよくできました',
         color: 'text-green-600',
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200',
         icon: 'A+',
-        message: 'Pronunciation is very accurate.'
+        message: '口の動きがほぼ完璧に一致しています。'
       }
     }
     if (value >= 80) {
       return {
-        grade: 'Great',
+        grade: 'かなり良いです',
         color: 'text-blue-600',
         bgColor: 'bg-blue-50',
         borderColor: 'border-blue-200',
         icon: 'A',
-        message: 'Strong pronunciation with only minor slips.'
+        message: 'わずかなズレだけで、とても精度の高い発音です。'
       }
     }
     if (value >= 70) {
       return {
-        grade: 'Good',
+        grade: 'まずまず',
         color: 'text-yellow-600',
         bgColor: 'bg-yellow-50',
         borderColor: 'border-yellow-200',
         icon: 'B',
-        message: 'Understandable, but some words were missed.'
+        message: 'いくつか抜けがあるものの、全体として伝わります。'
       }
     }
     return {
-      grade: 'Keep practicing',
+      grade: 'もう少し練習',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       borderColor: 'border-orange-200',
       icon: 'C',
-      message: 'Try again and focus on mouth shapes.'
+      message: '口の形とタイミングを意識して再挑戦しましょう。'
     }
   }
 
@@ -84,12 +84,12 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
         <div className="mb-3">
           <div className="bg-gray-50 rounded p-2">
             <ul className="text-xs text-gray-700 space-y-1 text-left">
-              <li>Recall: {recallPercent}% ({referenceSummary})</li>
-              <li>Precision: {precisionPercent}% {extraWords > 0 ? `(extra ${extraWords} words)` : '(no extras)'}</li>
+              <li>再現率: {recallPercent}% ({referenceSummary})</li>
+              <li>適合率: {precisionPercent}% {extraWords > 0 ? `(余分 ${extraWords} 語)` : '(余分なし)'}</li>
               {missedWords > 0 ? (
-                <li className="text-orange-600">Missing words: {missedWords}</li>
+                <li className="text-orange-600">認識されなかった語: {missedWords}</li>
               ) : (
-                <li className="text-green-600">Every reference word was detected.</li>
+                <li className="text-green-600">提示された単語をすべてカバーできました。</li>
               )}
             </ul>
           </div>
@@ -102,7 +102,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
               className="w-full bg-primary-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center space-x-2 text-sm"
             >
               <span>&gt;&gt;</span>
-              <span>Next sentence</span>
+              <span>次の例文へ</span>
             </button>
           ) : (
             <button
@@ -110,7 +110,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
               className="w-full bg-green-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center justify-center space-x-2 text-sm"
             >
               <span>*</span>
-              <span>Restart sequence</span>
+              <span>最初からやり直す</span>
             </button>
           )}
 
@@ -119,7 +119,7 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
             className="w-full bg-gray-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm"
           >
             <span>R</span>
-            <span>Try again</span>
+            <span>もう一度挑戦</span>
           </button>
         </div>
       </div>
