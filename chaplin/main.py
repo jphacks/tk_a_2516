@@ -37,17 +37,22 @@ class Chaplin:
 
     def perform_inference(self, video_path):
         # perform inference on the video with the vsr model
-        output = self.vsr_model(video_path)
+        output = self.vsr_model(video_path) or ""
+
+        # guard against empty output so keyboard shortcuts aren't sent with an empty command
+        if not output.strip():
+            return {
+                "output": "",
+                "video_path": video_path
+            }
 
         # write the raw output
         keyboard.write(output)
 
         # shift left to select the entire output
-        cmd = ""
-        for i in range(len(output)):
-            cmd += 'shift+left, '
-        cmd = cmd[:-2]
-        keyboard.press_and_release(cmd)
+        cmd = ', '.join(['shift+left'] * len(output))
+        if cmd:
+            keyboard.press_and_release(cmd)
 
         # perform inference on the raw output to get back a "correct" version
         response = chat(
