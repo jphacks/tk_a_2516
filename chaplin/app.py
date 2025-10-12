@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import base64
 import torch
@@ -7,6 +8,15 @@ import tempfile
 import os
 
 app = FastAPI()
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize the model (simplified, using default config)
 vsr_model = InferencePipeline(
