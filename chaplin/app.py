@@ -35,7 +35,7 @@ async def infer_video(file: UploadFile = File(...)):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
         temp_file.write(await file.read())
         temp_path = temp_file.name
-    
+
     try:
         # Perform inference
         output = vsr_model(temp_path)

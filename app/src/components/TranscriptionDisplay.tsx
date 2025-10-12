@@ -1,4 +1,43 @@
 import React from 'react'
+import { tokenize, longestCommonSubsequence } from '../utils/scoring'
+
+// LCS のバックトラックでマッチした reference のインデックスを取得
+const getMatchedIndices = (reference: string[], hypothesis: string[]): Set<number> => {
+  const refLen = reference.length
+  const hypLen = hypothesis.length
+
+  const dp: number[][] = Array.from({ length: refLen + 1 }, () =>
+    Array.from({ length: hypLen + 1 }, () => 0)
+  )
+
+  for (let i = 1; i <= refLen; i += 1) {
+    for (let j = 1; j <= hypLen; j += 1) {
+      if (reference[i - 1] === hypothesis[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
+      }
+    }
+  }
+
+  // バックトラックでマッチしたインデックスを収集
+  const matched = new Set<number>()
+  let i = refLen
+  let j = hypLen
+  while (i > 0 && j > 0) {
+    if (reference[i - 1] === hypothesis[j - 1]) {
+      matched.add(i - 1) // reference のインデックス
+      i -= 1
+      j -= 1
+    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      i -= 1
+    } else {
+      j -= 1
+    }
+  }
+
+  return matched
+}
 
 interface TranscriptionDisplayProps {
   originalSentence: string
