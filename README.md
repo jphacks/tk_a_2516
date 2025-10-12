@@ -1,4 +1,4 @@
-﻿# サンプル（プロダクト名）
+﻿# SilentSpeaking
 
 <img width="178" height="320" alt="Image" src="https://github.com/user-attachments/assets/2f16b0c9-0055-4ae5-910c-ca62edf31d6c" />
 
