@@ -4,6 +4,7 @@ import VideoRecorder from './components/VideoRecorder'
 import ScoreDisplay from './components/ScoreDisplay'
 import TranscriptionDisplay from './components/TranscriptionDisplay'
 import ProgressBar from './components/ProgressBar'
+import InfoDialog from './components/InfoDialog'
 
 // アプリの状態管理
 type AppState = 'ready' | 'recording' | 'processing' | 'result'
@@ -13,6 +14,7 @@ function App() {
   const [currentSentence, setCurrentSentence] = useState(0)
   const [score, setScore] = useState<number | null>(null)
   const [transcribedText, setTranscribedText] = useState<string>('')
+  const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false)
 
   // サンプル例文（MVP用）
   const sentences = [
@@ -98,18 +100,32 @@ function App() {
     setAppState('ready')
   }
 
+  // インフォメーションダイアログの開閉処理
+  const handleOpenInfoDialog = () => {
+    setIsInfoDialogOpen(true)
+  }
+
+  const handleCloseInfoDialog = () => {
+    setIsInfoDialogOpen(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-4 max-w-md">
         <ProgressBar current={currentSentence + 1} total={sentences.length} />
         {/* ヘッダー */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-4 relative">
           <h1 className="text-xl font-bold text-gray-800 mb-1">
             英語発音チェッカー
           </h1>
-          <p className="text-xs text-gray-600">
-            口の動きで発音を判定します
-          </p>
+          {/* インフォメーションアイコン */}
+          <button
+            onClick={handleOpenInfoDialog}
+            className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="アプリの使い方を表示"
+          >
+            <i className="fa-solid fa-circle-info text-xl"></i>
+          </button>
         </div>
 
         {/* メインコンテンツ */}
@@ -157,6 +173,12 @@ function App() {
           <p>電車の中でも気軽に発音練習</p>
         </div>
       </div>
+
+      {/* インフォメーションダイアログ */}
+      <InfoDialog
+        isOpen={isInfoDialogOpen}
+        onClose={handleCloseInfoDialog}
+      />
     </div>
   )
 }
