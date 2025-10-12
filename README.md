@@ -1,6 +1,6 @@
 # サンプル（プロダクト名）
 
-[![IMAGE ALT TEXT HERE](https://github.com/user-attachments/assets/13bfa5da-f278-4c11-9d34-53f51f3bae7e)]
+<img src="https://github.com/user-attachments/assets/13bfa5da-f278-4c11-9d34-53f51f3bae7e" width="500" height="300">
 
 ## 製品概要
 ### 背景(製品開発のきっかけ、課題等）
