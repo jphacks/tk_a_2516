@@ -1,4 +1,43 @@
 import React from 'react'
+import { normalizeText, tokenize, longestCommonSubsequence } from '../utils/scoring'
+
+// LCS のバックトラックでマッチした reference のインデックスを取得
+const getMatchedIndices = (reference: string[], hypothesis: string[]): Set<number> => {
+  const refLen = reference.length
+  const hypLen = hypothesis.length
+
+  const dp: number[][] = Array.from({ length: refLen + 1 }, () =>
+    Array.from({ length: hypLen + 1 }, () => 0)
+  )
+
+  for (let i = 1; i <= refLen; i += 1) {
+    for (let j = 1; j <= hypLen; j += 1) {
+      if (reference[i - 1] === hypothesis[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1])
+      }
+    }
+  }
+
+  // バックトラックでマッチしたインデックスを収集
+  const matched = new Set<number>()
+  let i = refLen
+  let j = hypLen
+  while (i > 0 && j > 0) {
+    if (reference[i - 1] === hypothesis[j - 1]) {
+      matched.add(i - 1) // reference のインデックス
+      i -= 1
+      j -= 1
+    } else if (dp[i - 1][j] > dp[i][j - 1]) {
+      i -= 1
+    } else {
+      j -= 1
+    }
+  }
+
+  return matched
+}
 
 interface TranscriptionDisplayProps {
   originalSentence: string
@@ -8,40 +47,28 @@ interface TranscriptionDisplayProps {
 
 // 単語単位での比較と色分けを行う関数
 const compareSentences = (original: string, transcribed: string) => {
-  // 単語に分割（句読点を除去して小文字に変換）
-  const splitIntoWords = (text: string): string[] => {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, '') // 句読点を除去
-      .split(/\s+/) // 空白で分割
-      .filter(word => word.length > 0) // 空文字を除去
-  }
+  const referenceWords = tokenize(original)
+  const hypothesisWords = tokenize(transcribed)
 
-  const originalWords = splitIntoWords(original)
-  const transcribedWords = splitIntoWords(transcribed)
+  const matchedIndices = getMatchedIndices(referenceWords, hypothesisWords)
+  const matchedCount = longestCommonSubsequence(referenceWords, hypothesisWords)
 
   // 単語の一致をチェック
-  const comparison = originalWords.map((originalWord, index) => {
-    const transcribedWord = transcribedWords[index]
-    const isMatch = transcribedWord && 
-      originalWord.toLowerCase() === transcribedWord.toLowerCase()
-    
-    return {
-      word: originalWord,
-      isCorrect: isMatch,
-      transcribed: transcribedWord || ''
-    }
-  })
+  const comparison = referenceWords.map((word, index) => ({
+    word,
+    isCorrect: matchedIndices.has(index),
+    transcribed: '' // 表示用に空文字
+  }))
 
-  return comparison
+  return { comparison, matchedCount, totalReference: referenceWords.length }
 }
 
-const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({ 
-  originalSentence, 
-  transcribedText, 
-  isVisible 
+const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
+  originalSentence,
+  transcribedText,
+  isVisible
 }) => {
-  const comparison = compareSentences(originalSentence, transcribedText)
+  const { comparison, matchedCount, totalReference } = compareSentences(originalSentence, transcribedText)
 
   return (
     <div className={`transition-all duration-500 ${isVisible ? 'opacity-100' : 'opacity-50'}`}>
@@ -95,10 +122,10 @@ const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
                 {/* 統計情報をコンパクトに表示 */}
                 <div className="mt-2 flex justify-center space-x-3 text-xs">
                   <span className="text-green-600 font-medium">
-                    ✓ {comparison.filter(item => item.isCorrect).length}正解
+                    ✓ {matchedCount}正解
                   </span>
                   <span className="text-red-600 font-medium">
-                    ✗ {comparison.filter(item => !item.isCorrect).length}誤り
+                    ✗ {totalReference - matchedCount}誤り
                   </span>
                 </div>
               </div>
