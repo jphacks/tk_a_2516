@@ -36,7 +36,7 @@ function App() {
       const formData = new FormData()
       formData.append('file', videoBlob, 'video.mp4')
 
-      const response = await fetch('/infer-video', {
+      const response = await fetch('http://localhost:8000/infer-video', {
         method: 'POST',
         body: formData
       })
