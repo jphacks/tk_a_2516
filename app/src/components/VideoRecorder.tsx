@@ -23,17 +23,17 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   useEffect(() => {
     const checkCameraPermission = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
             facingMode: 'user', // フロントカメラ
             width: { ideal: 640 },
             height: { ideal: 480 }
-          }, 
+          },
           audio: false // 音声は不要（口の動きのみ）
         })
         setHasPermission(true)
         streamRef.current = stream
-        
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream
         }
@@ -61,36 +61,36 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       const mediaRecorder = new MediaRecorder(streamRef.current, {
         mimeType: 'video/webm;codecs=vp8'
       })
-      
+
       const chunks: BlobPart[] = []
-      
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunks.push(event.data)
         }
       }
-      
+
       mediaRecorder.onstop = () => {
         const videoBlob = new Blob(chunks, { type: 'video/webm' })
         onStopRecording(videoBlob)
       }
-      
+
       mediaRecorderRef.current = mediaRecorder
       mediaRecorder.start(100) // 100ms間隔でデータを取得
       onStartRecording()
-      
+
       // 録画時間のカウント
       const startTime = Date.now()
       const timer = setInterval(() => {
         setRecordingTime(Math.floor((Date.now() - startTime) / 1000))
       }, 1000)
-      
+
       // 5秒後に自動停止
       setTimeout(() => {
         clearInterval(timer)
         stopRecording()
       }, 5000)
-      
+
     } catch (error) {
       console.error('録画開始エラー:', error)
     }
@@ -115,7 +115,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           <p className="text-sm text-gray-600 mb-4">
             口の動きを認識するためにカメラの使用を許可してください
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="bg-primary-500 text-white px-6 py-2 rounded-lg hover:bg-primary-600 transition-colors"
           >
@@ -131,7 +131,9 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     return (
       <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
         <div className="text-center">
-          <div className="animate-spin text-primary-500 text-4xl mb-4">⏳</div>
+          <div className="animate-spin text-primary-500 text-4xl mb-4">
+            <i className="fa-solid fa-spinner"></i>
+          </div>
           <p className="text-gray-600">カメラを準備中...</p>
         </div>
       </div>
@@ -149,7 +151,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           playsInline
           className="w-full h-64 object-cover"
         />
-        
+
         {/* 録画中のオーバーレイ */}
         {isRecording && (
           <div className="absolute inset-0 bg-red-500 bg-opacity-20 flex items-center justify-center">
@@ -159,7 +161,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* 処理中のオーバーレイ */}
         {isProcessing && (
           <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
@@ -178,21 +180,21 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
             onClick={startRecording}
             className="w-full bg-primary-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center space-x-2"
           >
-            <span>🎤</span>
+            <i className="fa-solid fa-microphone"></i>
             <span>録画開始</span>
           </button>
         )}
-        
+
         {isRecording && (
           <button
             onClick={stopRecording}
             className="w-full bg-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
           >
-            <span>⏹️</span>
+            <i className="fa-solid fa-pause"></i>
             <span>録画停止</span>
           </button>
         )}
-        
+
         <p className="text-xs text-gray-500 text-center mt-3">
           {isRecording ? '5秒間録画します' : '口の動きを5秒間録画して発音を判定します'}
         </p>
