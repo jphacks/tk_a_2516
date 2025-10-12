@@ -7,14 +7,14 @@ export interface ScoreBreakdown {
   totalHypothesis: number
 }
 
-const normalizeText = (text: string): string =>
+export const normalizeText = (text: string): string =>
   text
     .toLowerCase()
     .replace(/[^a-z0-9'\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 
-const tokenize = (text: string): string[] => {
+export const tokenize = (text: string): string[] => {
   if (!text) {
     return []
   }
@@ -23,7 +23,7 @@ const tokenize = (text: string): string[] => {
     .filter(Boolean)
 }
 
-const longestCommonSubsequence = (reference: string[], hypothesis: string[]): number => {
+export const longestCommonSubsequence = (reference: string[], hypothesis: string[]): number => {
   const refLen = reference.length
   const hypLen = hypothesis.length
 
