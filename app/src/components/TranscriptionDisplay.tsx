@@ -1,5 +1,5 @@
 import React from 'react'
-import { normalizeText, tokenize, longestCommonSubsequence } from '../utils/scoring'
+import {tokenize, longestCommonSubsequence } from '../utils/scoring'
 
 // LCS のバックトラックでマッチした reference のインデックスを取得
 const getMatchedIndices = (reference: string[], hypothesis: string[]): Set<number> => {
@@ -77,7 +77,7 @@ const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
           <h2 className="text-sm font-semibold text-gray-700 mb-2">
             文字起こし結果
           </h2>
-          
+
           {/* 適度にコンパクトな比較表示 */}
           <div className="space-y-2">
             {/* 元の例文 */}
