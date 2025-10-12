@@ -1,6 +1,6 @@
 ﻿# サンプル（プロダクト名）
 
-<img src="https://github.com/user-attachments/assets/13bfa5da-f278-4c11-9d34-53f51f3bae7e" width="500" height="300">
+<img width="178" height="320" alt="Image" src="https://github.com/user-attachments/assets/2f16b0c9-0055-4ae5-910c-ca62edf31d6c" />
 
 ## 製品概要
 ### 背景(製品開発のきっかけ、課題等）
