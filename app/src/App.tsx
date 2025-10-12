@@ -34,7 +34,7 @@ function App() {
 
     try {
       const formData = new FormData()
-      formData.append('file', videoBlob, 'video.mp4')
+      formData.append('file', videoBlob, 'recording.webm')
 
       const response = await fetch('http://localhost:8000/infer-video', {
         method: 'POST',
