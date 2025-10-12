@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SentenceDisplay from './components/SentenceDisplay'
 import VideoRecorder from './components/VideoRecorder'
 import ScoreDisplay from './components/ScoreDisplay'
@@ -12,18 +12,31 @@ type AppState = 'ready' | 'recording' | 'processing' | 'result'
 function App() {
   const [appState, setAppState] = useState<AppState>('ready')
   const [currentSentence, setCurrentSentence] = useState(0)
+  const [sentence, setSentence] = useState<string>('')
   const [score, setScore] = useState<number | null>(null)
   const [scoreDetails, setScoreDetails] = useState<ScoreBreakdown | null>(null)
   const [transcribedText, setTranscribedText] = useState<string>('')
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false)
 
-  const sentences = [
-    'Hello, how are you today?',
-    'I would like to order a coffee.',
-    'Thank you very much for your help.',
-    'Could you please repeat that?',
-    "I'm sorry, I don't understand."
-  ]
+
+  useEffect(() => {
+    fetchRandomSentence()
+  }, [])
+
+  const fetchRandomSentence = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/random-sentence')
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+      const data = await response.text()
+      setSentence(data)
+    } catch (error) {
+      console.error('Failed to fetch random sentence:', error)
+      // Fallback to a default sentence
+      setSentence('Hello, how are you today?')
+    }
+  }
 
   const handleStartRecording = () => {
     setAppState('recording')
@@ -49,7 +62,7 @@ function App() {
       const transcription: string = data.transcription ?? ''
       setTranscribedText(transcription)
 
-      const originalText = sentences[currentSentence]
+      const originalText = sentence
       const evaluation = evaluatePronunciation(originalText, transcription)
 
       setScore(evaluation.score)
@@ -64,11 +77,12 @@ function App() {
   }
 
   const handleNextSentence = () => {
-    if (currentSentence < sentences.length - 1) {
+    if (currentSentence < 4) {
       setCurrentSentence(currentSentence + 1)
     } else {
       setCurrentSentence(0)
     }
+    fetchRandomSentence()
 
     setScore(null)
     setScoreDetails(null)
@@ -94,7 +108,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-4 max-w-md">
-        <ProgressBar current={currentSentence + 1} total={sentences.length} />
+        <ProgressBar current={currentSentence + 1} total={5} />
         <div className="text-center mb-4 relative">
           <h1 className="inline-flex items-center gap-2 text-xl font-bold text-gray-800">
             <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white text-base font-semibold">
@@ -114,7 +128,7 @@ function App() {
         {appState !== 'result' ? (
           <div className="space-y-4">
             <SentenceDisplay
-              sentence={sentences[currentSentence]}
+              sentence={sentence}
               isVisible={appState === 'ready' || appState === 'recording'}
             />
 
@@ -129,7 +143,7 @@ function App() {
           <div className="space-y-3">
             {transcribedText && (
               <TranscriptionDisplay
-                originalSentence={sentences[currentSentence]}
+                originalSentence={sentence}
                 transcribedText={transcribedText}
                 isVisible
               />
@@ -141,7 +155,7 @@ function App() {
                 details={scoreDetails}
                 onNext={handleNextSentence}
                 onRetry={handleRetry}
-                isLastSentence={currentSentence === sentences.length - 1}
+                isLastSentence={currentSentence === 4}
               />
             )}
           </div>
