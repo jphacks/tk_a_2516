@@ -1,12 +1,22 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import base64
 import torch
 from pipelines.pipeline import InferencePipeline
 import tempfile
 import os
+import random
 
 app = FastAPI()
+
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize the model (simplified, using default config)
 vsr_model = InferencePipeline(
@@ -16,18 +26,12 @@ vsr_model = InferencePipeline(
     face_track=True
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "Hello World"}
-
-@app.post("/post-test")
-def post_test():
-    return {"message": "test!"}
-
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    content = await file.read()
-    return {"filename": file.filename, "content": content.decode("utf-8")}
+with open("./assets/tatoeba.tsv", "rt", encoding="utf-8") as fin:
+    sentences = [
+        s.split("\t")[1]
+        for s in fin.read().split("\n")
+        if s != ""
+    ]
 
 @app.post("/infer-video")
 async def infer_video(file: UploadFile = File(...)):
@@ -44,6 +48,9 @@ async def infer_video(file: UploadFile = File(...)):
         # Clean up temp file
         os.unlink(temp_path)
 
+@app.get("/random-sentence")
+def random_sentence():
+    return random.choice(sentences)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
