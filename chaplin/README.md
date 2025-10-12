@@ -9,8 +9,8 @@ FastAPIエンドポイントとして提供しています。
 
 1. リポジトリをクローン
 ```bash
-git clone https://github.com/amanvirparhar/chaplin.git
-cd chaplin
+git clone https://github.com/jphacks/tk_a_2516/tree/main
+cd tk_a_2516
 ```
 2. モデルをダウンロードして配置する。
 [LRS3_V_WER19.1](https://drive.google.com/file/d/1t8RHhzDTTvOQkLQhmK1LZGnXRRXOXGi6/view)をダウンロードして解凍し`chaplin/benchmarks/LRS3/models`に配置、
@@ -24,7 +24,7 @@ pip install -r chaplin/requirements.txt
 
 1. バックエンドの起動
 ```bash
-python app.py
+python chaplin/app.py
 ```
 2. API利用の例
 ```bash
