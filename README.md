@@ -42,3 +42,12 @@ ReactフロントエンドからLip reading機能呼び出すことができま�
 ### 独自技術
 #### ハッカソンで開発した独自機能・技術
 * LCS (最長共通部分列)を用いた採点機能 (`app/src/utils/scoring.ts`)
+
+## 著作権とライセンス
+
+### Tatoeba
+このプロジェクトは、Tatoeba（https://tatoeba.org/）の翻訳データを使用しています。Tatoebaは例文のデータベースで、CC BY 2.0 FRライセンスの下で提供されています。
+
+### Chaplin
+このプロジェクトは、Chaplin（https://github.com/amanvirparhar/chaplin）のコードを改変して使用しています。ChaplinはMITライセンスの下で提供されています。
+
