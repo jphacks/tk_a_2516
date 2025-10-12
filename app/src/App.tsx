@@ -32,46 +32,42 @@ function App() {
   const handleStopRecording = async (videoBlob: Blob) => {
     setAppState('processing')
 
-    // バックエンドに送信（MVPではモック）
     try {
-      // 実際の実装では、ここでバックエンドAPIを呼び出し
-      // videoBlobをバックエンドに送信して文字起こしと採点を行う
-      console.log('Video blob size:', videoBlob.size) // デバッグ用
+      const formData = new FormData()
+      formData.append('file', videoBlob, 'video.mp4')
 
-      await new Promise(resolve => setTimeout(resolve, 2000)) // 2秒のモック処理
+      const response = await fetch('/infer-video', {
+        method: 'POST',
+        body: formData
+      })
 
-      // ランダムに文字起こし結果を生成（実際の認識精度をシミュレート）
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const transcription = data.transcription
+      setTranscribedText(transcription)
+
+      // スコア計算部分はそのまま保持
       const originalText = sentences[currentSentence]
       const originalWords = originalText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(word => word.length > 0)
 
-      // 単語単位でランダムに誤りを生成
-      const mockTranscribedWords = originalWords.map(word => {
-        if (Math.random() > 0.7) { // 30%の確率で誤り
-          // 単語の一部を変更
-          const chars = word.split('')
-          const randomIndex = Math.floor(Math.random() * chars.length)
-          chars[randomIndex] = String.fromCharCode(97 + Math.floor(Math.random() * 26)) // ランダムな小文字
-          return chars.join('')
-        }
-        return word
-      })
-
-      const mockTranscribed = mockTranscribedWords.join(' ')
-      setTranscribedText(mockTranscribed)
+      const transcribedWords = transcription.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(word => word.length > 0)
 
       // ミス数に基づく点数計算
-      const correctWords = mockTranscribedWords.filter((word, index) =>
-        word.toLowerCase() === originalWords[index].toLowerCase()
+      const correctWords = transcribedWords.filter((word, index) =>
+        word === originalWords[index]
       ).length
       const totalWords = originalWords.length
 
       // ミス数が少ないほど高得点（0ミス=100点、全ミス=0点）
-      const scorePercentage = (correctWords / totalWords) * 100
-      const mockScore = Math.round(scorePercentage)
+      const scorePercentage = totalWords > 0 ? (correctWords / totalWords) * 100 : 0
+      const calculatedScore = Math.round(scorePercentage)
 
-      console.log(`正解単語: ${correctWords}/${totalWords}, スコア: ${mockScore}点`) // デバッグ用
+      console.log(`正解単語: ${correctWords}/${totalWords}, スコア: ${calculatedScore}点`) // デバッグ用
 
-      setScore(mockScore)
+      setScore(calculatedScore)
       setAppState('result')
     } catch (error) {
       console.error('採点エラー:', error)
