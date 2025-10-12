@@ -143,7 +143,9 @@ function App() {
         )}
 
         <div className="mt-4 text-center text-xs text-gray-500">
+
           <p>Practice quietly anywhere with visual feedback.</p>
+
         </div>
       </div>
 

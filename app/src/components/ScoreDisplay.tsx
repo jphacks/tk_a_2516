@@ -101,7 +101,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
               onClick={onNext}
               className="w-full bg-primary-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center space-x-2 text-sm"
             >
+
               <span>&gt;&gt;</span>
+
               <span>次の例文へ</span>
             </button>
           ) : (
@@ -118,7 +120,9 @@ const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
             onClick={onRetry}
             className="w-full bg-gray-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm"
           >
+
             <span>R</span>
+
             <span>もう一度挑戦</span>
           </button>
         </div>
