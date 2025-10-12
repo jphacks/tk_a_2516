@@ -96,7 +96,12 @@ function App() {
       <div className="container mx-auto px-4 py-4 max-w-md">
         <ProgressBar current={currentSentence + 1} total={sentences.length} />
         <div className="text-center mb-4 relative">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">Lipreading Pronunciation Coach</h1>
+          <h1 className="inline-flex items-center gap-2 text-xl font-bold text-gray-800">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white text-base font-semibold">
+              SS
+            </span>
+            <span>SilentSpeaking</span>
+          </h1>
           <button
             onClick={handleOpenInfoDialog}
             className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors"

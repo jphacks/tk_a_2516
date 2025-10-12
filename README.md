@@ -1,4 +1,4 @@
-# サンプル（プロダクト名）
+﻿# サンプル（プロダクト名）
 
 <img src="https://github.com/user-attachments/assets/13bfa5da-f278-4c11-9d34-53f51f3bae7e" width="500" height="300">
 
@@ -41,3 +41,5 @@
 #### ハッカソンで開発した独自機能・技術
 * 独自で開発したものの内容をこちらに記載してください
 * 特に力を入れた部分をファイルリンク、またはcommit_idを記載してください。
+
+* LCS (最長共通部分列)を用いた採点機能 (`app/src/utils/scoring.ts`)
