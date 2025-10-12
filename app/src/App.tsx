@@ -1,29 +1,42 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SentenceDisplay from './components/SentenceDisplay'
 import VideoRecorder from './components/VideoRecorder'
 import ScoreDisplay from './components/ScoreDisplay'
 import TranscriptionDisplay from './components/TranscriptionDisplay'
 import ProgressBar from './components/ProgressBar'
 import InfoDialog from './components/InfoDialog'
+import { evaluatePronunciation, type ScoreBreakdown } from './utils/scoring'
 
-// アプリの状態管理
 type AppState = 'ready' | 'recording' | 'processing' | 'result'
 
 function App() {
   const [appState, setAppState] = useState<AppState>('ready')
   const [currentSentence, setCurrentSentence] = useState(0)
+  const [sentence, setSentence] = useState<string>('')
   const [score, setScore] = useState<number | null>(null)
+  const [scoreDetails, setScoreDetails] = useState<ScoreBreakdown | null>(null)
   const [transcribedText, setTranscribedText] = useState<string>('')
   const [isInfoDialogOpen, setIsInfoDialogOpen] = useState(false)
 
-  // サンプル例文（MVP用）
-  const sentences = [
-    "Hello, how are you today?",
-    "I would like to order a coffee.",
-    "Thank you very much for your help.",
-    "Could you please repeat that?",
-    "I'm sorry, I don't understand."
-  ]
+
+  useEffect(() => {
+    fetchRandomSentence()
+  }, [])
+
+  const fetchRandomSentence = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/random-sentence')
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
+      const data = await response.text()
+      setSentence(data)
+    } catch (error) {
+      console.error('Failed to fetch random sentence:', error)
+      // Fallback to a default sentence
+      setSentence('Hello, how are you today?')
+    }
+  }
 
   const handleStartRecording = () => {
     setAppState('recording')
@@ -32,75 +45,58 @@ function App() {
   const handleStopRecording = async (videoBlob: Blob) => {
     setAppState('processing')
 
-    // バックエンドに送信（MVPではモック）
     try {
-      // 実際の実装では、ここでバックエンドAPIを呼び出し
-      // videoBlobをバックエンドに送信して文字起こしと採点を行う
-      console.log('Video blob size:', videoBlob.size) // デバッグ用
+      const formData = new FormData()
+      formData.append('file', videoBlob, 'recording.webm')
 
-      await new Promise(resolve => setTimeout(resolve, 2000)) // 2秒のモック処理
-
-      // ランダムに文字起こし結果を生成（実際の認識精度をシミュレート）
-      const originalText = sentences[currentSentence]
-      const originalWords = originalText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(word => word.length > 0)
-
-      // 単語単位でランダムに誤りを生成
-      const mockTranscribedWords = originalWords.map(word => {
-        if (Math.random() > 0.7) { // 30%の確率で誤り
-          // 単語の一部を変更
-          const chars = word.split('')
-          const randomIndex = Math.floor(Math.random() * chars.length)
-          chars[randomIndex] = String.fromCharCode(97 + Math.floor(Math.random() * 26)) // ランダムな小文字
-          return chars.join('')
-        }
-        return word
+      const response = await fetch('http://localhost:8000/infer-video', {
+        method: 'POST',
+        body: formData
       })
 
-      const mockTranscribed = mockTranscribedWords.join(' ')
-      setTranscribedText(mockTranscribed)
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`)
+      }
 
-      // ミス数に基づく点数計算
-      const correctWords = mockTranscribedWords.filter((word, index) =>
-        word.toLowerCase() === originalWords[index].toLowerCase()
-      ).length
-      const totalWords = originalWords.length
+      const data = await response.json()
+      const transcription: string = data.transcription ?? ''
+      setTranscribedText(transcription)
 
-      // ミス数が少ないほど高得点（0ミス=100点、全ミス=0点）
-      const scorePercentage = (correctWords / totalWords) * 100
-      const mockScore = Math.round(scorePercentage)
+      const originalText = sentence
+      const evaluation = evaluatePronunciation(originalText, transcription)
 
-      console.log(`正解単語: ${correctWords}/${totalWords}, スコア: ${mockScore}点`) // デバッグ用
-
-      setScore(mockScore)
+      setScore(evaluation.score)
+      setScoreDetails(evaluation)
       setAppState('result')
     } catch (error) {
-      console.error('採点エラー:', error)
+      console.error('Scoring error:', error)
+      setScore(null)
+      setScoreDetails(null)
       setAppState('ready')
     }
   }
 
   const handleNextSentence = () => {
-    if (currentSentence < sentences.length - 1) {
+    if (currentSentence < 4) {
       setCurrentSentence(currentSentence + 1)
-      setScore(null)
-      setTranscribedText('')
-      setAppState('ready')
     } else {
-      // 全ての例文が終了
       setCurrentSentence(0)
-      setScore(null)
-      setTranscribedText('')
-      setAppState('ready')
     }
-  }
+    fetchRandomSentence()
 
-  const handleRetry = () => {
     setScore(null)
+    setScoreDetails(null)
     setTranscribedText('')
     setAppState('ready')
   }
 
-  // インフォメーションダイアログの開閉処理
+  const handleRetry = () => {
+    setScore(null)
+    setScoreDetails(null)
+    setTranscribedText('')
+    setAppState('ready')
+  }
+
   const handleOpenInfoDialog = () => {
     setIsInfoDialogOpen(true)
   }
@@ -112,32 +108,30 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-4 max-w-md">
-        <ProgressBar current={currentSentence + 1} total={sentences.length} />
-        {/* ヘッダー */}
+        <ProgressBar current={currentSentence + 1} total={5} />
         <div className="text-center mb-4 relative">
-          <h1 className="text-xl font-bold text-gray-800 mb-1">
-            英語発音チェッカー
+          <h1 className="inline-flex items-center gap-2 text-xl font-bold text-gray-800">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary-500 text-white text-base font-semibold">
+              SS
+            </span>
+            <span>SilentSpeaking</span>
           </h1>
-          {/* インフォメーションアイコン */}
           <button
             onClick={handleOpenInfoDialog}
             className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="アプリの使い方を表示"
+            aria-label="Show instructions"
           >
             <i className="fa-solid fa-circle-info text-xl"></i>
           </button>
         </div>
 
-        {/* メインコンテンツ */}
         {appState !== 'result' ? (
           <div className="space-y-4">
-            {/* 例文表示 */}
             <SentenceDisplay
-              sentence={sentences[currentSentence]}
+              sentence={sentence}
               isVisible={appState === 'ready' || appState === 'recording'}
             />
 
-            {/* 録画エリア */}
             <VideoRecorder
               isRecording={appState === 'recording'}
               onStartRecording={handleStartRecording}
@@ -147,37 +141,34 @@ function App() {
           </div>
         ) : (
           <div className="space-y-3">
-            {/* 文字起こし結果表示 */}
             {transcribedText && (
               <TranscriptionDisplay
-                originalSentence={sentences[currentSentence]}
+                originalSentence={sentence}
                 transcribedText={transcribedText}
-                isVisible={true}
+                isVisible
               />
             )}
 
-            {/* 採点結果 */}
-            {score !== null && (
+            {score !== null && scoreDetails && (
               <ScoreDisplay
                 score={score}
+                details={scoreDetails}
                 onNext={handleNextSentence}
                 onRetry={handleRetry}
-                isLastSentence={currentSentence === sentences.length - 1}
+                isLastSentence={currentSentence === 4}
               />
             )}
           </div>
         )}
 
-        {/* フッター */}
         <div className="mt-4 text-center text-xs text-gray-500">
+
+          <p>電車の中でも気軽に発音練習</p>
+
         </div>
       </div>
 
-      {/* インフォメーションダイアログ */}
-      <InfoDialog
-        isOpen={isInfoDialogOpen}
-        onClose={handleCloseInfoDialog}
-      />
+      <InfoDialog isOpen={isInfoDialogOpen} onClose={handleCloseInfoDialog} />
     </div>
   )
 }
