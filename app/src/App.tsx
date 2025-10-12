@@ -149,7 +149,7 @@ function App() {
 
         <div className="mt-4 text-center text-xs text-gray-500">
 
-          <p>Practice quietly anywhere with visual feedback.</p>
+          <p>電車の中でも気軽に発音練習</p>
 
         </div>
       </div>
