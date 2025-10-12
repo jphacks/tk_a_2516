@@ -170,7 +170,6 @@ function App() {
 
         {/* フッター */}
         <div className="mt-4 text-center text-xs text-gray-500">
-          <p>電車の中でも気軽に発音練習</p>
         </div>
       </div>
 
