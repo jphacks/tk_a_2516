@@ -1,23 +1,23 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState } from "react";
 
 interface VideoRecorderProps {
-  isRecording: boolean
-  onStartRecording: () => void
-  onStopRecording: (videoBlob: Blob) => void
-  isProcessing: boolean
+  isRecording: boolean;
+  onStartRecording: () => void;
+  onStopRecording: (videoBlob: Blob) => void;
+  isProcessing: boolean;
 }
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   isRecording,
   onStartRecording,
   onStopRecording,
-  isProcessing
+  isProcessing,
 }) => {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null)
-  const [recordingTime, setRecordingTime] = useState(0)
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
 
   // カメラアクセス許可の確認
   useEffect(() => {
@@ -25,83 +25,85 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: 'user', // フロントカメラ
+            facingMode: "user", // フロントカメラ
             width: { ideal: 640 },
-            height: { ideal: 480 }
+            height: { ideal: 480 },
           },
-          audio: false // 音声は不要（口の動きのみ）
-        })
-        setHasPermission(true)
-        streamRef.current = stream
+          audio: false, // 音声は不要（口の動きのみ）
+        });
+        setHasPermission(true);
+        streamRef.current = stream;
 
         if (videoRef.current) {
-          videoRef.current.srcObject = stream
+          videoRef.current.srcObject = stream;
         }
       } catch (error) {
-        console.error('カメラアクセスエラー:', error)
-        setHasPermission(false)
+        console.error("カメラアクセスエラー:", error);
+        setHasPermission(false);
       }
-    }
+    };
 
-    checkCameraPermission()
+    checkCameraPermission();
 
     // クリーンアップ
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
-    }
-  }, [])
+    };
+  }, []);
 
   // 録画開始
   const startRecording = async () => {
-    if (!streamRef.current) return
+    if (!streamRef.current) return;
 
     try {
       const mediaRecorder = new MediaRecorder(streamRef.current, {
-        mimeType: 'video/webm;codecs=vp8'
-      })
+        mimeType: "video/webm;codecs=vp8",
+      });
 
-      const chunks: BlobPart[] = []
+      const chunks: BlobPart[] = [];
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          chunks.push(event.data)
+          chunks.push(event.data);
         }
-      }
+      };
 
       mediaRecorder.onstop = () => {
-        const videoBlob = new Blob(chunks, { type: 'video/webm' })
-        onStopRecording(videoBlob)
-      }
+        const videoBlob = new Blob(chunks, { type: "video/webm" });
+        onStopRecording(videoBlob);
+      };
 
-      mediaRecorderRef.current = mediaRecorder
-      mediaRecorder.start(100) // 100ms間隔でデータを取得
-      onStartRecording()
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start(100); // 100ms間隔でデータを取得
+      onStartRecording();
 
       // 録画時間のカウント
-      const startTime = Date.now()
+      const startTime = Date.now();
       const timer = setInterval(() => {
-        setRecordingTime(Math.floor((Date.now() - startTime) / 1000))
-      }, 1000)
+        setRecordingTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
 
       // 5秒後に自動停止
       setTimeout(() => {
-        clearInterval(timer)
-        stopRecording()
-      }, 5000)
-
+        clearInterval(timer);
+        stopRecording();
+      }, 5000);
     } catch (error) {
-      console.error('録画開始エラー:', error)
+      console.error("録画開始エラー:", error);
     }
-  }
+  };
 
   // 録画停止
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop()
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state === "recording"
+    ) {
+      mediaRecorderRef.current.stop();
     }
-  }
+  };
 
   // カメラ許可が拒否された場合
   if (hasPermission === false) {
@@ -123,7 +125,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   // カメラ読み込み中
@@ -137,7 +139,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           <p className="text-gray-600">カメラを準備中...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -178,29 +180,29 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         {!isRecording && !isProcessing && (
           <button
             onClick={startRecording}
-            className="w-full bg-primary-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center space-x-2"
+            className="w-14 h-14 bg-primary-500 text-white py-3 px-3 rounded-full font-semibold hover:bg-primary-600 transition-colors flex items-center justify-center mx-auto"
           >
             <i className="fa-solid fa-microphone"></i>
-            <span>録画開始</span>
           </button>
         )}
 
         {isRecording && (
           <button
             onClick={stopRecording}
-            className="w-full bg-red-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-600 transition-colors flex items-center justify-center space-x-2"
+            className="w-14 h-14 bg-red-500 text-white py-3 px-3 rounded-full font-semibold hover:bg-red-600 transition-colors flex items-center justify-center mx-auto"
           >
             <i className="fa-solid fa-pause"></i>
-            <span>録画停止</span>
           </button>
         )}
 
         <p className="text-xs text-gray-500 text-center mt-3">
-          {isRecording ? '5秒間録画します' : '口の動きを5秒間録画して発音を判定します'}
+          {isRecording
+            ? "5秒間録画します"
+            : "口の動きを5秒間録画して発音を判定します"}
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VideoRecorder
+export default VideoRecorder;
