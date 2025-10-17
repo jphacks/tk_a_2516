@@ -16,11 +16,13 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libpng-dev \
     libtiff-dev \
-    libatlas-base-dev \
     gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-# Pythonの依存関係をコピーしてインストール
+# PyTorchを先にインストール（CPU版）
+RUN pip install --no-cache-dir torch==2.8.0+cpu torchaudio==2.8.0+cpu torchvision==0.23.0+cpu --index-url https://download.pytorch.org/whl/cpu
+
+# その他のPythonの依存関係をインストール
 COPY chaplin/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
