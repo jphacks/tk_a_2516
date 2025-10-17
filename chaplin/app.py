@@ -2,7 +2,6 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import torch
-from pipelines.pipeline import InferencePipeline
 import tempfile
 import os
 import random
@@ -19,17 +18,27 @@ app.add_middleware(
 )
 
 # Initialize the model (simplified, using default config)
-try:
-    vsr_model = InferencePipeline(
-        "configs/LRS3_V_WER19.1.ini",  # Replace with actual config path if needed
-        device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-        detector="mediapipe",  # Example detector
-        face_track=True
-    )
-    print("モデルの初期化が完了しました")
-except Exception as e:
-    print(f"モデルの初期化に失敗しました: {e}")
-    vsr_model = None
+vsr_model = None
+print("アプリケーションを起動中...")
+
+# モデルファイルの存在確認
+model_path = "benchmarks/LRS3/models/LRS3_V_WER19.1"
+if os.path.exists(model_path):
+    try:
+        from pipelines.pipeline import InferencePipeline
+        vsr_model = InferencePipeline(
+            "configs/LRS3_V_WER19.1.ini",
+            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+            detector="mediapipe",
+            face_track=True
+        )
+        print("モデルの初期化が完了しました")
+    except Exception as e:
+        print(f"モデルの初期化に失敗しました: {e}")
+        vsr_model = None
+else:
+    print(f"モデルファイルが見つかりません: {model_path}")
+    print("モデルなしでアプリケーションを起動します")
 
 with open("./assets/tatoeba.tsv", "rt", encoding="utf-8") as fin:
     sentences = [
@@ -61,6 +70,22 @@ async def infer_video(file: UploadFile = File(...)):
 @app.get("/random-sentence")
 def random_sentence():
     return random.choice(sentences)
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "model_loaded": vsr_model is not None,
+        "message": "アプリケーションは正常に動作しています"
+    }
+
+@app.get("/")
+def root():
+    return {
+        "message": "Visual Speech Recognition API",
+        "status": "running",
+        "model_loaded": vsr_model is not None
+    }
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

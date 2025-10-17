@@ -40,4 +40,4 @@ ENV PORT=8080
 ENV PYTHONPATH=/app
 
 # アプリケーションを起動
-CMD ["python", "app.py"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]
