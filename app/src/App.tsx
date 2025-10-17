@@ -25,7 +25,8 @@ function App() {
 
   const fetchRandomSentence = async () => {
     try {
-      const response = await fetch('http://localhost:8000/random-sentence')
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/random-sentence`)
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`)
       }
@@ -49,7 +50,8 @@ function App() {
       const formData = new FormData()
       formData.append('file', videoBlob, 'recording.webm')
 
-      const response = await fetch('http://localhost:8000/infer-video', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/infer-video`, {
         method: 'POST',
         body: formData
       })

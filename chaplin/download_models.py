@@ -14,7 +14,7 @@ def download_file_from_gdrive(file_id: str, destination: str) -> bool:
     """Google Driveからファイルをダウンロードする"""
     try:
         print(f"Google Driveからダウンロード中: {file_id}")
-        
+
         # 方法1: gdownライブラリを使用
         try:
             url = f"https://drive.google.com/uc?id={file_id}"
@@ -25,37 +25,37 @@ def download_file_from_gdrive(file_id: str, destination: str) -> bool:
                 return True
         except Exception as e:
             print(f"gdownでのダウンロード失敗: {e}")
-        
+
         # 方法2: requestsライブラリを使用
         try:
             url = f"https://drive.google.com/uc?export=download&id={file_id}"
             print(f"requestsで試行中: {url}")
-            
+
             session = requests.Session()
             response = session.get(url, stream=True)
-            
+
             # 大きなファイルの場合の確認ページをスキップ
             if 'download_warning' in response.url:
                 confirm_url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
                 response = session.get(confirm_url, stream=True)
-            
+
             response.raise_for_status()
-            
+
             with open(destination, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)
-            
+
             if os.path.exists(destination) and os.path.getsize(destination) > 0:
                 print(f"requestsでダウンロード完了: {destination}")
                 return True
-                
+
         except Exception as e:
             print(f"requestsでのダウンロード失敗: {e}")
-        
+
         print("すべてのダウンロード方法が失敗しました")
         return False
-        
+
     except Exception as e:
         print(f"ダウンロードエラー: {e}")
         return False
