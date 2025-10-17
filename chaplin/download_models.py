@@ -14,10 +14,48 @@ def download_file_from_gdrive(file_id: str, destination: str) -> bool:
     """Google Driveからファイルをダウンロードする"""
     try:
         print(f"Google Driveからダウンロード中: {file_id}")
-        url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, destination, quiet=False)
-        print(f"ダウンロード完了: {destination}")
-        return True
+        
+        # 方法1: gdownライブラリを使用
+        try:
+            url = f"https://drive.google.com/uc?id={file_id}"
+            print(f"gdownで試行中: {url}")
+            gdown.download(url, destination, quiet=False)
+            if os.path.exists(destination) and os.path.getsize(destination) > 0:
+                print(f"gdownでダウンロード完了: {destination}")
+                return True
+        except Exception as e:
+            print(f"gdownでのダウンロード失敗: {e}")
+        
+        # 方法2: requestsライブラリを使用
+        try:
+            url = f"https://drive.google.com/uc?export=download&id={file_id}"
+            print(f"requestsで試行中: {url}")
+            
+            session = requests.Session()
+            response = session.get(url, stream=True)
+            
+            # 大きなファイルの場合の確認ページをスキップ
+            if 'download_warning' in response.url:
+                confirm_url = f"https://drive.google.com/uc?export=download&confirm=t&id={file_id}"
+                response = session.get(confirm_url, stream=True)
+            
+            response.raise_for_status()
+            
+            with open(destination, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            
+            if os.path.exists(destination) and os.path.getsize(destination) > 0:
+                print(f"requestsでダウンロード完了: {destination}")
+                return True
+                
+        except Exception as e:
+            print(f"requestsでのダウンロード失敗: {e}")
+        
+        print("すべてのダウンロード方法が失敗しました")
+        return False
+        
     except Exception as e:
         print(f"ダウンロードエラー: {e}")
         return False
@@ -54,19 +92,27 @@ def setup_models():
         print("LRS3_V_WER19.1モデルをダウンロード中...")
         model_zip = "LRS3_V_WER19.1.zip"
         if download_file_from_gdrive(model_file_id, model_zip):
-            extract_zip(model_zip, models_dir)
-            os.remove(model_zip)  # ZIPファイルを削除
+            if extract_zip(model_zip, models_dir):
+                os.remove(model_zip)  # ZIPファイルを削除
+                print("LRS3_V_WER19.1モデルのセットアップが完了しました")
+            else:
+                print("モデルの展開に失敗しました")
         else:
-            print("モデルのダウンロードに失敗しました")
+            print("LRS3_V_WER19.1モデルのダウンロードに失敗しました")
+            print("モデルなしでアプリケーションを起動します")
 
     if not lm_exists:
         print("lm_en_subwordモデルをダウンロード中...")
         lm_zip = "lm_en_subword.zip"
         if download_file_from_gdrive(lm_file_id, lm_zip):
-            extract_zip(lm_zip, lm_dir)
-            os.remove(lm_zip)  # ZIPファイルを削除
+            if extract_zip(lm_zip, lm_dir):
+                os.remove(lm_zip)  # ZIPファイルを削除
+                print("lm_en_subwordモデルのセットアップが完了しました")
+            else:
+                print("言語モデルの展開に失敗しました")
         else:
-            print("言語モデルのダウンロードに失敗しました")
+            print("lm_en_subwordモデルのダウンロードに失敗しました")
+            print("言語モデルなしでアプリケーションを起動します")
 
     if model_exists and lm_exists:
         print("すべてのモデルが準備完了しています！")
