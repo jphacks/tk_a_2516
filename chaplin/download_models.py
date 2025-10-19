@@ -80,9 +80,9 @@ def setup_models():
     models_dir.mkdir(parents=True, exist_ok=True)
     lm_dir.mkdir(parents=True, exist_ok=True)
 
-    # Google DriveのファイルID
-    model_file_id = "1t8RHhzDTTvOQkLQhmK1LZGnXRRXOXGi6"  # LRS3_V_WER19.1
-    lm_file_id = "1g31HGxJnnOwYl17b70ObFQZ1TSnPvRQv"     # lm_en_subword
+    # Google DriveのファイルID（実際のファイルID）
+    model_file_id = "1p8CWMA1JghP8m57xeZdunPQZLu2aEgt_"  # LRS3_V_WER19.1
+    lm_file_id = "1XC-mIHiCwypsE5W4XIwnrAIq71Cr6JmA"     # lm_en_subword
 
     # モデルが既に存在するかチェック
     model_exists = (models_dir / "LRS3_V_WER19.1").exists()
