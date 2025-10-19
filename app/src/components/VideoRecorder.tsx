@@ -38,7 +38,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           console.log("video要素にストリームを設定");
-          
+
           // 映像の読み込みを待つ
           videoRef.current.onloadedmetadata = () => {
             console.log("映像メタデータ読み込み完了");
@@ -48,12 +48,12 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               });
             }
           };
-          
+
           // 映像の再生開始を待つ
           videoRef.current.onplay = () => {
             console.log("映像再生開始");
           };
-          
+
           // エラーハンドリング
           videoRef.current.onerror = (error) => {
             console.error("video要素エラー:", error);
@@ -61,7 +61,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         }
       } catch (error) {
         console.error("カメラアクセスエラー:", error);
-        
+
         // フォールバック: より緩い制約で再試行
         try {
           console.log("フォールバック: より緩い制約でカメラアクセスを試行");
@@ -69,7 +69,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
             video: true, // 制約を緩める
             audio: false,
           });
-          
+
           setHasPermission(true);
           streamRef.current = fallbackStream;
           console.log("フォールバックカメラストリーム取得成功:", fallbackStream);
