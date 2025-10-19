@@ -53,6 +53,26 @@ def download_file_from_gdrive(file_id: str, destination: str) -> bool:
         except Exception as e:
             print(f"requestsでのダウンロード失敗: {e}")
 
+        # 方法3: 直接ダウンロードリンクを使用
+        try:
+            direct_url = f"https://drive.google.com/uc?export=download&id={file_id}&confirm=t"
+            print(f"直接ダウンロードで試行中: {direct_url}")
+            
+            response = requests.get(direct_url, stream=True)
+            response.raise_for_status()
+            
+            with open(destination, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            
+            if os.path.exists(destination) and os.path.getsize(destination) > 0:
+                print(f"直接ダウンロード完了: {destination}")
+                return True
+                
+        except Exception as e:
+            print(f"直接ダウンロード失敗: {e}")
+
         print("すべてのダウンロード方法が失敗しました")
         return False
 
