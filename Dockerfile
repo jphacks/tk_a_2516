@@ -29,8 +29,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリケーションのコードをコピー
 COPY chaplin/ .
 
-# モデルダウンロードスクリプトを実行（エラーを無視）
-RUN python download_models.py || echo "モデルダウンロードをスキップしました"
+# モデルダウンロードスクリプトを実行（詳細ログ付き）
+RUN echo "=== モデルダウンロード開始 ===" && \
+    python download_models.py && \
+    echo "=== モデルダウンロード完了 ===" && \
+    ls -la benchmarks/LRS3/models/ && \
+    ls -la benchmarks/LRS3/language_models/
 
 # ポート8080を公開（Cloud Runのデフォルト）
 EXPOSE 8080
