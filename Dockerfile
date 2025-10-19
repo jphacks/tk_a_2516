@@ -29,6 +29,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # アプリケーションのコードをコピー
 COPY chaplin/ .
 
+# ローカルのモデルファイルをコピー（存在する場合）
+COPY chaplin/benchmarks/LRS3/models/LRS3_V_WER19.1.zip . 2>/dev/null || echo "ローカルLRS3モデルファイルが見つかりません"
+COPY chaplin/benchmarks/LRS3/language_models/lm_en_subword.zip . 2>/dev/null || echo "ローカル言語モデルファイルが見つかりません"
+
 # モデルダウンロードスクリプトを実行（詳細ログ付き）
 RUN echo "=== モデルダウンロード開始 ===" && \
     python download_models.py && \

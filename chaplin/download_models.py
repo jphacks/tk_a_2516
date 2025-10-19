@@ -73,11 +73,25 @@ def download_file_from_gdrive(file_id: str, destination: str) -> bool:
             if os.path.exists(destination):
                 file_size = os.path.getsize(destination)
                 print(f"ファイル存在確認: {destination} (サイズ: {file_size} bytes)")
-                if file_size > 0:
+
+                # ファイル内容の確認（最初の100文字）
+                try:
+                    with open(destination, 'rb') as f:
+                        first_bytes = f.read(100)
+                        print(f"ファイルの最初の100バイト: {first_bytes}")
+                        # HTMLエラーページかどうかチェック
+                        if b'<html' in first_bytes.lower() or b'<!doctype' in first_bytes.lower():
+                            print("❌ HTMLエラーページがダウンロードされました")
+                            return False
+                except Exception as e:
+                    print(f"ファイル内容確認エラー: {e}")
+
+                if file_size > 1000000:  # 1MB以上の場合のみ成功とする
                     print(f"✅ requestsでダウンロード成功: {destination}")
                     return True
                 else:
-                    print(f"❌ ファイルサイズが0: {destination}")
+                    print(f"❌ ファイルサイズが小さすぎます: {file_size} bytes (期待値: 1MB以上)")
+                    return False
             else:
                 print(f"❌ ファイルが存在しません: {destination}")
 
@@ -106,16 +120,72 @@ def download_file_from_gdrive(file_id: str, destination: str) -> bool:
             if os.path.exists(destination):
                 file_size = os.path.getsize(destination)
                 print(f"ファイル存在確認: {destination} (サイズ: {file_size} bytes)")
-                if file_size > 0:
+
+                # ファイル内容の確認（最初の100文字）
+                try:
+                    with open(destination, 'rb') as f:
+                        first_bytes = f.read(100)
+                        print(f"ファイルの最初の100バイト: {first_bytes}")
+                        # HTMLエラーページかどうかチェック
+                        if b'<html' in first_bytes.lower() or b'<!doctype' in first_bytes.lower():
+                            print("❌ HTMLエラーページがダウンロードされました")
+                            return False
+                except Exception as e:
+                    print(f"ファイル内容確認エラー: {e}")
+
+                if file_size > 1000000:  # 1MB以上の場合のみ成功とする
                     print(f"✅ 直接ダウンロード成功: {destination}")
                     return True
                 else:
-                    print(f"❌ ファイルサイズが0: {destination}")
+                    print(f"❌ ファイルサイズが小さすぎます: {file_size} bytes (期待値: 1MB以上)")
+                    return False
             else:
                 print(f"❌ ファイルが存在しません: {destination}")
 
         except Exception as e:
             print(f"❌ 直接ダウンロード失敗: {e}")
+            print(f"エラータイプ: {type(e).__name__}")
+
+        # 方法4: 新しいGoogle Drive API形式
+        try:
+            new_url = f"https://drive.google.com/file/d/{file_id}/view?usp=sharing"
+            print(f"方法4: 新しいAPI形式で試行中: {new_url}")
+
+            # まずページを取得してダウンロードリンクを抽出
+            response = requests.get(new_url)
+            print(f"ページ取得レスポンス: {response.status_code}")
+
+            if response.status_code == 200:
+                # 実際のダウンロードURLを構築
+                download_url = f"https://drive.google.com/uc?export=download&id={file_id}&confirm=t&authuser=0"
+                print(f"実際のダウンロードURL: {download_url}")
+
+                response = requests.get(download_url, stream=True)
+                print(f"ダウンロードレスポンス: {response.status_code}")
+                response.raise_for_status()
+
+                total_size = 0
+                with open(destination, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+                            total_size += len(chunk)
+                            if total_size % (1024 * 1024) == 0:  # 1MBごとにログ
+                                print(f"新APIダウンロード進行中: {total_size / (1024 * 1024):.1f}MB")
+
+                if os.path.exists(destination):
+                    file_size = os.path.getsize(destination)
+                    print(f"ファイル存在確認: {destination} (サイズ: {file_size} bytes)")
+
+                    if file_size > 1000000:  # 1MB以上の場合のみ成功とする
+                        print(f"✅ 新APIダウンロード成功: {destination}")
+                        return True
+                    else:
+                        print(f"❌ ファイルサイズが小さすぎます: {file_size} bytes")
+                        return False
+
+        except Exception as e:
+            print(f"❌ 新APIダウンロード失敗: {e}")
             print(f"エラータイプ: {type(e).__name__}")
 
         print("❌ すべてのダウンロード方法が失敗しました")
@@ -179,6 +249,28 @@ def setup_models():
     models_dir.mkdir(parents=True, exist_ok=True)
     print(f"言語モデルディレクトリ作成: {lm_dir}")
     lm_dir.mkdir(parents=True, exist_ok=True)
+
+    # ローカルにモデルファイルがあるかチェック
+    local_model_zip = "LRS3_V_WER19.1.zip"
+    local_lm_zip = "lm_en_subword.zip"
+
+    print(f"\n🔍 ローカルファイル確認:")
+    print(f"ローカルLRS3モデル: {os.path.exists(local_model_zip)}")
+    print(f"ローカル言語モデル: {os.path.exists(local_lm_zip)}")
+
+    if os.path.exists(local_model_zip):
+        print(f"✅ ローカルLRS3モデルファイル発見: {local_model_zip}")
+        if extract_zip(local_model_zip, models_dir):
+            print("✅ ローカルLRS3モデルの展開が完了しました")
+        else:
+            print("❌ ローカルLRS3モデルの展開に失敗しました")
+
+    if os.path.exists(local_lm_zip):
+        print(f"✅ ローカル言語モデルファイル発見: {local_lm_zip}")
+        if extract_zip(local_lm_zip, lm_dir):
+            print("✅ ローカル言語モデルの展開が完了しました")
+        else:
+            print("❌ ローカル言語モデルの展開に失敗しました")
 
     # Google DriveのファイルID（実際のファイルID）
     model_file_id = "1p8CWMA1JghP8m57xeZdunPQZLu2aEgt_"  # LRS3_V_WER19.1
