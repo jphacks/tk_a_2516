@@ -26,20 +26,66 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: "user", // フロントカメラ
-            width: { ideal: 640 },
-            height: { ideal: 480 },
+            width: { ideal: 640, min: 320 },
+            height: { ideal: 480, min: 240 },
           },
           audio: false, // 音声は不要（口の動きのみ）
         });
         setHasPermission(true);
         streamRef.current = stream;
+        console.log("カメラストリーム取得成功:", stream);
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          console.log("video要素にストリームを設定");
+          
+          // 映像の読み込みを待つ
+          videoRef.current.onloadedmetadata = () => {
+            console.log("映像メタデータ読み込み完了");
+            if (videoRef.current) {
+              videoRef.current.play().catch((error) => {
+                console.error("映像再生エラー:", error);
+              });
+            }
+          };
+          
+          // 映像の再生開始を待つ
+          videoRef.current.onplay = () => {
+            console.log("映像再生開始");
+          };
+          
+          // エラーハンドリング
+          videoRef.current.onerror = (error) => {
+            console.error("video要素エラー:", error);
+          };
         }
       } catch (error) {
         console.error("カメラアクセスエラー:", error);
-        setHasPermission(false);
+        
+        // フォールバック: より緩い制約で再試行
+        try {
+          console.log("フォールバック: より緩い制約でカメラアクセスを試行");
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({
+            video: true, // 制約を緩める
+            audio: false,
+          });
+          
+          setHasPermission(true);
+          streamRef.current = fallbackStream;
+          console.log("フォールバックカメラストリーム取得成功:", fallbackStream);
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = fallbackStream;
+            videoRef.current.onloadedmetadata = () => {
+              if (videoRef.current) {
+                videoRef.current.play().catch(console.error);
+              }
+            };
+          }
+        } catch (fallbackError) {
+          console.error("フォールバックカメラアクセスも失敗:", fallbackError);
+          setHasPermission(false);
+        }
       }
     };
 
